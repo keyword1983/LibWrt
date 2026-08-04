@@ -75,7 +75,7 @@ jobs:
           find dl -size -1024c -exec rm -f {} \;
 
       - name: Build firmware
-        timeout-minutes: 90
+        timeout-minutes: 180
         run: |
           echo "$(nproc) thread build"
           make -j$(nproc) || make -j1 || make -j1 V=s
