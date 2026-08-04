@@ -36,7 +36,9 @@ jobs:
           NEEDRESTART_SUSPEND: 1
         timeout-minutes: 10
         run: |
-          sudo apt-get install -y --no-install-recommends build-essential clang flex g++ gawk gcc-multilib \
+          sudo apt-get install -y --no-install-recommends \
+            -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" \
+            build-essential clang flex g++ gawk gcc-multilib \
             g++-multilib gettext git libncurses-dev libssl-dev python3-setuptools \
             python3-distutils rsync unzip zlib1g-dev file wget
 
