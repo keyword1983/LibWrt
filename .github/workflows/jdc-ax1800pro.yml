@@ -61,13 +61,11 @@ jobs:
           make defconfig
 
       - name: Cache build output
-        uses: actions/cache@v4
+        uses: HiGarfield/cachewrtbuild@main
         with:
-          path: |
-            dl
-            staging_dir/host
-          key: jdc-ax1800pro-dl-${{ hashFiles('seed.config') }}
-          restore-keys: jdc-ax1800pro-dl-
+          ccache: false
+          mixkey: jdc-ax1800pro-custom-jdcloud_re-ss-01
+          prefix: ${{ github.workspace }}
 
       - name: Download package sources
         timeout-minutes: 20
@@ -80,7 +78,7 @@ jobs:
         timeout-minutes: 90
         run: |
           echo "$(nproc) thread build"
-          make -j$(nproc) || make -j1 V=sc
+          make -j$(nproc) || make -j1 || make -j1 V=s
 
       - name: Check image size
         run: |
