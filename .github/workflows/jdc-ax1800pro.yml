@@ -28,9 +28,12 @@ jobs:
       - name: Install build dependencies
         env:
           DEBIAN_FRONTEND: noninteractive
+          NEEDRESTART_MODE: a
+          NEEDRESTART_SUSPEND: 1
+        timeout-minutes: 10
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y -qq build-essential clang flex g++ gawk gcc-multilib \
+          sudo apt-get install -y -qq --no-install-recommends build-essential clang flex g++ gawk gcc-multilib \
             g++-multilib gettext git libncurses-dev libssl-dev python3-setuptools \
             python3-distutils rsync unzip zlib1g-dev file wget
 
@@ -40,6 +43,7 @@ jobs:
           ./diy-jdc.sh
 
       - name: Update and install feeds
+        timeout-minutes: 15
         run: |
           ./scripts/feeds update -a
           ./scripts/feeds install -a
@@ -59,12 +63,14 @@ jobs:
           restore-keys: jdc-ax1800pro-dl-
 
       - name: Download package sources
+        timeout-minutes: 20
         run: |
           make download -j8
           find dl -size -1024c -exec ls -l {} \;
           find dl -size -1024c -exec rm -f {} \;
 
       - name: Build firmware
+        timeout-minutes: 90
         run: |
           echo "$(nproc) thread build"
           make -j$(nproc) || make -j1 V=sc
