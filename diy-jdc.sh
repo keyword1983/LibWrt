@@ -5,12 +5,11 @@
 set -e
 
 rm -rf package/openwrt-passwall package/luci-app-passwall2 \
-       package/luci-app-ssr-plus package/app-store-ui package/istore-luci \
+       package/app-store-ui package/istore-luci \
        package/luci-app-tailscale
 
 git clone --depth=1 https://github.com/Openwrt-Passwall/openwrt-passwall-packages package/openwrt-passwall
 git clone --depth=1 https://github.com/Openwrt-Passwall/openwrt-passwall2 package/luci-app-passwall2
-git clone --depth=1 -b main https://github.com/fw876/helloworld package/luci-app-ssr-plus
 git clone --depth=1 https://github.com/asvow/luci-app-tailscale package/luci-app-tailscale
 
 git clone --depth=1 https://github.com/linkease/istore-ui /tmp/istore-ui
