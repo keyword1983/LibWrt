@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Free disk space
-        timeout-minutes: 5
+        timeout-minutes: 10
         run: |
           sudo rm -rf /usr/share/dotnet /etc/apt/sources.list.d /usr/local/lib/android "$AGENT_TOOLSDIRECTORY" || true
           sudo apt-get -y purge azure-cli ghc* zulu* llvm* firefox google* dotnet* powershell openjdk* mongodb* moby* || true
