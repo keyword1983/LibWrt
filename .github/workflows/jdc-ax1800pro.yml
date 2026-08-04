@@ -68,7 +68,7 @@ jobs:
           prefix: ${{ github.workspace }}
 
       - name: Download package sources
-        timeout-minutes: 20
+        timeout-minutes: 40
         run: |
           make download -j8
           find dl -size -1024c -exec ls -l {} \;
