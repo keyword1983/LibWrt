@@ -57,6 +57,15 @@ jobs:
 
       - name: Apply seed config
         run: |
+          # luci-app-tailscale ships its own /etc/init.d/tailscale and
+          # /etc/config/tailscale (more featureful than the base package's),
+          # which collides with the base tailscale package's copies at
+          # image-assembly time. Drop the base package's install of those
+          # two files so only the LuCI app's versions end up on the image.
+          sed -i \
+            -e '/INSTALL_BIN.*tailscale\.init.*etc\/init\.d\/tailscale/d' \
+            -e '/INSTALL_DATA.*tailscale\.conf.*etc\/config\/tailscale/d' \
+            feeds/packages/net/tailscale/Makefile
           cp seed.config .config
           make defconfig
 
