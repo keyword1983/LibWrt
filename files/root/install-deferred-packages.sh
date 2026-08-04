@@ -25,7 +25,7 @@ if [ "$OVERLAY_SIZE_KB" -lt 1048576 ]; then
 fi
 
 mkdir -p "$WORKDIR"
-wget -O "$WORKDIR/deferred-packages.tar.gz" --timeout=30 --tries=3 "$RELEASE_URL"
+wget -O "$WORKDIR/deferred-packages.tar.gz" --timeout=30 "$RELEASE_URL"
 tar -xzf "$WORKDIR/deferred-packages.tar.gz" -C "$WORKDIR"
 apk add --allow-untrusted "$WORKDIR"/*.apk
 rm -rf "$WORKDIR"
