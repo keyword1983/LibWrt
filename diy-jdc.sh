@@ -28,6 +28,21 @@ mkdir -p package/luci-app-openvpn
 cp -r /tmp/luci-openvpn-src/applications/luci-app-openvpn/* package/luci-app-openvpn/
 rm -rf /tmp/luci-openvpn-src
 
+# Fix 1: Makefile's `include ../../luci.mk` assumes the package still lives
+# two levels under a luci feed root (applications/luci-app-openvpn/Makefile);
+# since we dropped it straight into package/, that path resolves to nowhere
+# and the package silently never registers a Kconfig symbol.
+sed -i 's#include ../../luci.mk#include $(TOPDIR)/feeds/luci/luci.mk#' \
+	package/luci-app-openvpn/Makefile
+
+# Fix 2: upstream bug (present as of openwrt-23.05) -- the "config" column's
+# cfgvalue() only sets `s.extedit` as a side effect and never returns the
+# value, so every instance's name column in the overview table renders blank.
+sed -i '/s.extedit = luci.dispatcher.build_url("admin", "vpn", "openvpn", "basic", "%s")/,/^\tend$/{
+	/^\tend$/a\
+	return file_cfg or section
+}' package/luci-app-openvpn/luasrc/model/cbi/openvpn.lua
+
 git clone --depth=1 https://github.com/linkease/istore-ui /tmp/istore-ui
 mkdir -p package/app-store-ui
 cp -r /tmp/istore-ui/app-store-ui/* package/app-store-ui/
