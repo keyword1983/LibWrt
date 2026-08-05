@@ -1,0 +1,9 @@
+{
+  "version": 2,
+  "architecture": "aarch64_cortex-a53",
+  "packages": {
+    "nss-eip-firmware": "2.5.7-r1",
+    "nss-firmware": "2025.05.01-r1",
+    "nss-firmware-ipq60xx": "2025.05.01-r1"
+  }
+}
