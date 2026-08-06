@@ -1,0 +1,11 @@
+firmware release: jdc-ax1800pro-20260805-1349
+kernel package: kernel-6.12.94~e3ec66deb84392060c33e5ff24d30ce7-r1
+commit: e927c9b42a (pre-mwan3; kernel config unchanged since this build)
+
+Before installing any kmod from this folder, verify your router's
+currently-running kernel matches:
+
+    apk list --installed | grep '^kernel-'
+
+If the hash doesn't match this file, use a different dated folder (or
+none are compatible yet -- ask for a fresh build against your kernel).
