@@ -35,6 +35,31 @@ sh /root/install-deferred-packages.sh
 
 這個腳本會從 GitHub Release 下載 `deferred-packages.tar.gz` 並用 `apk add` 裝好。裝完 LuCI 重新整理應該就能看到 PassWall2 / AdGuardHome / Tailscale 的頁面。
 
+### 2.1 用自架 apk repo 裝套件（比手動下 tarball 更方便）
+
+這個分支同時維護一個 `gh-pages` 分支當 apk repo（https://keyword1983.github.io/LibWrt/），裝好之後可以直接 `apk update` + `apk add <套件名>`，不用每次手動抓 tarball。加入方式：
+
+```sh
+cat >> /etc/apk/repositories.d/customfeeds.list << 'EOF'
+https://keyword1983.github.io/LibWrt/aarch64_cortex-a53/base/packages.adb
+https://keyword1983.github.io/LibWrt/aarch64_cortex-a53/luci/packages.adb
+https://keyword1983.github.io/LibWrt/aarch64_cortex-a53/packages/packages.adb
+EOF
+apk update
+```
+
+以上三條是**跟核心版本無關**的一般套件（passwall2、adguardhome、mwan3 本體、各種 luci-app-* 等），任何時候都可以用。
+
+**kmod（USB 4G/5G 驅動等）要另外加一條，而且要對版本**：kmod 內部記錄了它是對哪一版核心編的，裝錯版本的 kmod 會直接被 apk 擋掉（不會裝成半殘的錯誤版本，這點不用擔心裝壞）。每次重新刷機（核心版本可能因此改變）都會開一個新資料夾，資料夾名稱對應 firmware release 名稱，例如目前對應 `jdc-ax1800pro-20260805-1349` 這個 release 的：
+
+```sh
+echo "https://keyword1983.github.io/LibWrt/qualcommax/ipq60xx/jdc-ax1800pro-20260805-1349/packages.adb" \
+  >> /etc/apk/repositories.d/customfeeds.list
+apk update
+```
+
+刷到新版本後，先看資料夾裡的 `KERNEL.txt` 對一下 `apk list --installed | grep '^kernel-'` 的雜湊值是否一致，再換成對應新版本的資料夾網址（把上面這條換掉），不要把新舊版本的網址同時留著。
+
 ---
 
 ## 3. 各功能怎麼用
@@ -93,9 +118,25 @@ rm -rf /tmp/luci-indexcache* /tmp/luci-modulecache*
 
 LuCI → Services → UPnP，開啟即可，走 nftables（`miniupnpd-nftables`），跟這個 build 的 firewall4 一致。
 
+### 3.7 mwan3（WAN + USB 4G/5G 備援，*目前尚未完整可用*）
+
+seed.config 已經加了 `mwan3` + `luci-app-mwan3`，但它依賴的 `kmod-ip6tables`/`kmod-ipt-ipset` 目前這個 build 的核心裡還沒有（要重新編譯核心才會有，會跟現有已安裝的東西核心版本不一致，需要配合刷機一起做）。單純裝 `mwan3` 套件本身不會影響現有 WAN，但功能還沒法完整運作，等下一輪重編+刷機再處理。
+
 ---
 
-## 4. 已知限制
+## 4. 備份
+
+用 LuCI「產生備份」或 `sysupgrade -b` 時，`/etc/config/*`（所有 UCI 設定）會自動包含。但以下這些不是 UCI 設定、預設不會被備份，已經加進 `/etc/sysupgrade.conf`：
+
+- `/etc/openvpn/`（OpenVPN client 的 `.ovpn`/帳密檔、server 的 pki 憑證）
+- `/etc/adguardhome/`（AdGuardHome 真正的設定內容，UCI 那邊只是個存根）
+- `/etc/tailscale/`（Tailscale 登入狀態）
+- `/etc/apk/repositories.d/`（自架 apk repo 設定，見 2.1）
+
+如果是全新安裝、`/etc/sysupgrade.conf` 還是預設內容，先手動加上面幾行再做備份。
+
+## 5. 已知限制
 
 - **OpenVPN client 不要用 Network → Interfaces 的 `proto=openvpn` 方式設定**：實測過 netifd 那條整合路徑對「要接管預設路由換 IP」這種用法不穩定——tunnel 能連上、ubus 狀態也顯示路由已套用，但實際上那條 default route 常常沒有真正寫進 kernel routing table（這是 netifd 本身已知的一類 bug，跟版本/設定都無關）。要用 LuCI → VPN → OpenVPN 那個獨立頁面。
 - **修改防火牆/openvpn/modemmanager 等設定後 LuCI 頁面異常**，優先懷疑快取（`/tmp/luci-indexcache`、`/tmp/luci-modulecache`）或 rpcd/netifd 沒有重新載入,不是設定本身壞掉。
+- **關閉某個 netifd 網路介面要用 `option auto '0'`，不是 `option enabled '0'`**：後者對 netifd 沒有實際作用，`/etc/init.d/network restart`（不管是自己手動跑還是別的設定改動觸發的)都會把它重新帶起來。
