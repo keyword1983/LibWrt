@@ -30,6 +30,23 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v4
 
+      - name: Set release tag
+        run: echo "RELEASE_TAG=jdc-ax1800pro-$(date +%Y%m%d-%H%M)" >> $GITHUB_ENV
+
+      - name: Use fixed apk signing key
+        run: |
+          # Without this, OpenWrt's build system auto-generates a fresh
+          # random keypair every run, so packages built by two different
+          # CI runs (or a CI run vs. the persistent dev VM) never match
+          # each other's trust -- everything needs --allow-untrusted
+          # forever and there's no way to mark this build's key as
+          # trusted on a router once and have it stick across rebuilds.
+          # Keep signing with the same keypair every time instead.
+          # public-key.pem is committed in the repo (it's fine to share);
+          # actions/checkout above already placed it, so only the private
+          # half needs to come from a secret.
+          echo "${{ secrets.APK_SIGNING_KEY }}" > private-key.pem
+
       - name: apt-get update
         timeout-minutes: 5
         run: sudo apt-get update
@@ -103,13 +120,54 @@ jobs:
           name: jdcloud_re-ss-01-firmware
           path: bin/targets/**/*
 
-      - name: Set release tag
-        if: github.event.inputs.upload_release == '1'
-        run: echo "RELEASE_TAG=jdc-ax1800pro-$(date +%Y%m%d-%H%M)" >> $GITHUB_ENV
-
       - name: Upload to release
         if: github.event.inputs.upload_release == '1'
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ env.RELEASE_TAG }}
           files: bin/targets/**/*
+
+      - name: Publish apk repo to gh-pages
+        if: github.event.inputs.upload_release == '1'
+        run: |
+          # Generic (kernel-independent) packages: base/luci/packages, one
+          # shared copy, always safe to overwrite wholesale.
+          #
+          # kmod tree: kernel-module packages carry an internal dependency
+          # on the exact kernel package they were built against (apk
+          # refuses to install a mismatched one -- confirmed safe, it
+          # errors out rather than installing something broken). Since
+          # this workflow does a full clean build every run, this run's
+          # kmods and this run's firmware image always share the same
+          # kernel build, so tag the kmod folder with this run's
+          # RELEASE_TAG and never overwrite an older tag's folder.
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git fetch origin gh-pages
+          git worktree add /tmp/gh-pages origin/gh-pages
+
+          rm -rf /tmp/gh-pages/aarch64_cortex-a53
+          cp -r bin/packages/aarch64_cortex-a53 /tmp/gh-pages/aarch64_cortex-a53
+
+          mkdir -p "/tmp/gh-pages/qualcommax/ipq60xx/${RELEASE_TAG}"
+          cp bin/targets/qualcommax/ipq60xx/packages/*.apk \
+             bin/targets/qualcommax/ipq60xx/packages/packages.adb \
+             "/tmp/gh-pages/qualcommax/ipq60xx/${RELEASE_TAG}/"
+          cat > "/tmp/gh-pages/qualcommax/ipq60xx/${RELEASE_TAG}/KERNEL.txt" << EOF
+          firmware release: ${RELEASE_TAG}
+          built by: GitHub Actions run ${{ github.run_id }} ($(date -u +%Y-%m-%dT%H:%M:%SZ))
+
+          Before installing any kmod from this folder, verify your
+          router's currently-running kernel is from this same release:
+
+              apk list --installed | grep '^kernel-'
+
+          apk itself will refuse to install a kmod that doesn't match
+          your kernel, so this is just to help you pick the right repo
+          URL -- it won't let you install something broken by accident.
+          EOF
+
+          cd /tmp/gh-pages
+          git add -A
+          git commit -m "gh-pages: publish apk repo for ${RELEASE_TAG}" || echo "nothing to commit"
+          git push origin gh-pages
