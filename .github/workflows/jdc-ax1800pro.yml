@@ -120,12 +120,28 @@ jobs:
           name: jdcloud_re-ss-01-firmware
           path: bin/targets/**/*
 
+      - name: Build deferred packages archive
+        if: github.event.inputs.upload_release == '1'
+        run: |
+          mkdir -p /tmp/deferred-packages-staging
+          find bin/packages bin/targets -name "*.apk" -exec cp {} /tmp/deferred-packages-staging/ \;
+          tar -czf bin/targets/qualcommax/ipq60xx/deferred-packages.tar.gz -C /tmp/deferred-packages-staging .
+          rm -rf /tmp/deferred-packages-staging
+
       - name: Upload to release
         if: github.event.inputs.upload_release == '1'
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ env.RELEASE_TAG }}
           files: bin/targets/**/*
+
+      - name: Update deferred packages release tag
+        if: github.event.inputs.upload_release == '1'
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: deferred-packages-jdc-ax1800pro
+          files: bin/targets/qualcommax/ipq60xx/deferred-packages.tar.gz
+
 
       - name: Publish apk repo to gh-pages
         if: github.event.inputs.upload_release == '1'

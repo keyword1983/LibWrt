@@ -107,8 +107,7 @@ Both are separate from the firmware image itself and both need to be understood 
 
 1. **`deferred-packages-jdc-ax1800pro` GitHub Release** — a single `deferred-packages.tar.gz`
    asset containing the `=m` packages + their non-generic deps, consumed by
-   `install-deferred-packages.sh`. **Rebuilding this tarball is still a manual process** (see
-   "Pending work" below) — CI does not yet regenerate it.
+   `install-deferred-packages.sh`. **Automated in CI workflow** — automatically generated from all built `.apk` packages during CI runs with `upload_release=1` and updated to both the release tag and `deferred-packages-jdc-ax1800pro`.
 2. **`gh-pages` branch** (published at `https://keyword1983.github.io/LibWrt/`) — a real apk
    repository (`packages.adb` index files, generated via `apk mkndx`), addable to a router's
    `/etc/apk/repositories.d/customfeeds.list` for direct `apk update && apk add <name>` without
@@ -198,13 +197,7 @@ Both are separate from the firmware image itself and both need to be understood 
 
 ## Pending work
 
-- **Automate `deferred-packages.tar.gz` rebuilding in CI.** Currently manual: collect the `=m`
-  packages' actual installed dependency closure (not just the named `=m` packages — things like
-  `chinadns-ng`, `xray-core`, `v2ray-geoip/geosite`, `lyaml` for passwall2, or `dbus`/`glib2`/
-  `libqmi`/`libmbim` for modemmanager, most of which come from the *public* immortalwrt feed at
-  install time rather than needing to be custom-built) and package it. Doing this correctly in
-  CI needs either a resolve-in-a-chroot step against the freshly built repo, or an explicit
-  maintained list.
+- **Automate `deferred-packages.tar.gz` rebuilding in CI.** (Completed) CI workflow (`.github/workflows/jdc-ax1800pro.yml`) automatically packages all built `.apk` files into `deferred-packages.tar.gz` and publishes it to both the release tag and the `deferred-packages-jdc-ax1800pro` GitHub Release asset when `upload_release=1`.
 - **mwan3 kernel gap.** Needs a full rebuild + reflash cycle (kmod-ip6tables/kmod-ipt-ipset
   require kernel changes) before the failover functionality is actually usable. Do this as a
   deliberate, backed-up maintenance window, not a quick add-on — see the sysupgrade-wipes-overlay
