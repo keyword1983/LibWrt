@@ -50,6 +50,57 @@ this checkout, not cloning something else at CI time.
   (`HiGarfield/cachewrtbuild` for incremental cache), optionally publishes a firmware release
   (tag `jdc-ax1800pro-<date>-<time>`) and the apk repo (see below) when `upload_release=1`.
 
+## Targeting a different device
+
+This build targets one specific device (`jdcloud_re-ss-01`) out of several already defined in
+the same `qualcommax/ipq60xx` target — switching to another one already-defined device is a
+`seed.config` change, not a new port. Other devices sharing this target (from
+`target/linux/qualcommax/image/ipq60xx.mk` — check that file for the current list, this is a
+snapshot, not exhaustive):
+
+| Device symbol | DEVICE_MODEL | SoC | Notes |
+|---|---|---|---|
+| `jdcloud_re-ss-01` | RE-SS-01 | ipq6000 | This build's target (marketed as "AX1800 Pro") |
+| `jdcloud_re-cs-02` | RE-CS-02 | ipq6010 | Needs `ath11k-firmware-qcn9074` |
+| `jdcloud_re-cs-07` | RE-CS-07 | ipq6010 | Explicitly *excludes* ath11k/hostapd packages (see its `DEVICE_PACKAGES` — likely no built-in wifi, or a different wifi chip) |
+| `redmi_ax5-jdcloud` | Redmi AX5 JDCloud | ipq6000 | Different vendor branding, same JDCloud firmware lineage |
+
+These are **internal codenames** (`RE-SS-01` etc.), not retail/marketing names — this repo's
+source has no mapping from a marketing name (e.g. a Chinese product nickname) to these codenames.
+**Never guess that mapping and flash based on the guess** — flashing the wrong device profile's
+image onto real hardware can brick it (wrong DTS, wrong partition layout, wrong radio calibration
+data). Confirm the exact codename against the physical unit (label on the device, stock firmware's
+own "about" page, or the seller's listing) before changing anything below.
+
+To switch: in `seed.config`, replace all four device-selection lines with the new device's symbol
+(keep the `=y` on all four, both target lines stay `qualcommax`/`ipq60xx` since these devices all
+share that target):
+
+```
+CONFIG_TARGET_qualcommax=y
+CONFIG_TARGET_qualcommax_ipq60xx=y
+CONFIG_TARGET_qualcommax_ipq60xx_DEVICE_<new-device-symbol>=y
+CONFIG_TARGET_DEVICE_qualcommax_ipq60xx_DEVICE_<new-device-symbol>=y
+```
+
+Then `cp seed.config .config && make defconfig` — Kconfig will auto-resolve that device's own
+`DEVICE_PACKAGES` (radio calibration/firmware packages, wifi driver variants, etc. — see the
+per-device `ipq60xx.mk` blocks) without needing to touch anything else in `seed.config`. If the
+new device's SoC/wifi hardware genuinely differs (e.g. `ipq6010` vs this build's `ipq6000`, or
+`jdcloud_re-cs-07`'s apparent lack of the ath11k stack), re-check every device-specific comment in
+`seed.config` (the USB3/NSS/wifi-offload blocks especially) — they were written and tested against
+`jdcloud_re-ss-01`'s specific hardware and may not all apply as-is.
+
+To see the **full, current** device list for this target (not just the JDCloud-branded ones — this
+target has many other devices too) rather than relying on a snapshot like the table above:
+
+```sh
+grep -n '^define Device/' target/linux/qualcommax/image/ipq60xx.mk
+```
+
+or interactively via `make menuconfig` → Target System → Qualcomm Atheros QCA/QCN (IPQ) 60xx/106xx
+→ Target Profile.
+
 ## Two persistent apk distribution channels
 
 Both are separate from the firmware image itself and both need to be understood together:
