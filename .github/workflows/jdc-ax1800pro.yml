@@ -160,7 +160,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git fetch origin gh-pages
-          git worktree add /tmp/gh-pages origin/gh-pages
+          git worktree add -B gh-pages /tmp/gh-pages origin/gh-pages
 
           rm -rf /tmp/gh-pages/aarch64_cortex-a53
           cp -r bin/packages/aarch64_cortex-a53 /tmp/gh-pages/aarch64_cortex-a53
@@ -186,4 +186,5 @@ jobs:
           cd /tmp/gh-pages
           git add -A
           git commit -m "gh-pages: publish apk repo for ${RELEASE_TAG}" || echo "nothing to commit"
-          git push origin gh-pages
+          git push origin HEAD:gh-pages
+
