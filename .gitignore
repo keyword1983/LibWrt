@@ -35,3 +35,6 @@ git-src
 .cproject
 .ccache
 .vscode*
+
+# local-only dev notes (VM/router IPs, credentials) -- never commit
+/LOCAL-DEV-NOTES.md
