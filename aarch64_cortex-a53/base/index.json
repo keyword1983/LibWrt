@@ -94,7 +94,6 @@
     "odhcpd-ipv6only": "2026.06.28~68f38269-r1",
     "openssl-util": "3.5.7-r1",
     "openwrt-keyring": "2025.12.11~14e1f88b-r1",
-    "opkg": "2025.11.05~80503d94-r1",
     "ppp": "2.5.3-r1",
     "ppp-mod-pppoe": "2.5.3-r1",
     "procd": "2026.06.17~60fdbf00-r1",
