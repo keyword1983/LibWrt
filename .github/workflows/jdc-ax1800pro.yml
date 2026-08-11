@@ -7,6 +7,10 @@ on:
         description: 'Upload firmware to a GitHub Release'
         required: true
         default: '0'
+  push:
+    branches:
+      - jdc-ax1800pro-custom
+
 
 env:
   TZ: Asia/Taipei
