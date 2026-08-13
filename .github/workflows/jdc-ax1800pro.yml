@@ -10,7 +10,8 @@ on:
   push:
     branches:
       - jdc-ax1800pro-custom
-
+    tags:
+      - 'v*'
 
 env:
   TZ: Asia/Taipei
@@ -35,7 +36,12 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set release tag
-        run: echo "RELEASE_TAG=jdc-ax1800pro-$(date +%Y%m%d-%H%M)" >> $GITHUB_ENV
+        run: |
+          if [ -n "${{ github.ref_name }}" ] && [[ "${{ github.ref_name }}" == v* ]]; then
+            echo "RELEASE_TAG=${{ github.ref_name }}" >> $GITHUB_ENV
+          else
+            echo "RELEASE_TAG=jdc-ax1800pro-$(date +%Y%m%d-%H%M)" >> $GITHUB_ENV
+          fi
 
       - name: Use fixed apk signing key
         run: |
@@ -125,7 +131,7 @@ jobs:
           path: bin/targets/**/*
 
       - name: Build deferred packages archive
-        if: github.event.inputs.upload_release == '1' || github.event_name == 'push'
+        if: github.event.inputs.upload_release == '1' || startsWith(github.ref, 'refs/tags/v')
         run: |
           mkdir -p /tmp/deferred-packages-staging
           find bin/packages bin/targets -name "*.apk" -exec cp {} /tmp/deferred-packages-staging/ \;
@@ -133,14 +139,14 @@ jobs:
           rm -rf /tmp/deferred-packages-staging
 
       - name: Upload to release
-        if: github.event.inputs.upload_release == '1' || github.event_name == 'push'
+        if: github.event.inputs.upload_release == '1' || startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ env.RELEASE_TAG }}
           files: bin/targets/**/*
 
       - name: Update deferred packages release tag
-        if: github.event.inputs.upload_release == '1' || github.event_name == 'push'
+        if: github.event.inputs.upload_release == '1' || startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v1
         with:
           tag_name: deferred-packages-jdc-ax1800pro
@@ -148,7 +154,7 @@ jobs:
 
 
       - name: Publish apk repo to gh-pages
-        if: github.event.inputs.upload_release == '1' || github.event_name == 'push'
+        if: github.event.inputs.upload_release == '1' || startsWith(github.ref, 'refs/tags/v')
         run: |
           # Generic (kernel-independent) packages: base/luci/packages, one
           # shared copy, always safe to overwrite wholesale.
