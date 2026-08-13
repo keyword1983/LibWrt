@@ -1,0 +1,11 @@
+firmware release: jdc-ax1800pro-20260813-2129
+built by: GitHub Actions run 31704872402 (2026-08-13T16:09:56Z)
+
+Before installing any kmod from this folder, verify your
+router's currently-running kernel is from this same release:
+
+    apk list --installed | grep '^kernel-'
+
+apk itself will refuse to install a kmod that doesn't match
+your kernel, so this is just to help you pick the right repo
+URL -- it won't let you install something broken by accident.
