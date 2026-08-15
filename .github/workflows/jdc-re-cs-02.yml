@@ -147,6 +147,7 @@ jobs:
 
           rm -rf /tmp/gh-pages/aarch64_cortex-a53
           cp -r bin/packages/aarch64_cortex-a53 /tmp/gh-pages/aarch64_cortex-a53
+          find /tmp/gh-pages -name "packages.adb" -execdir cp packages.adb APKINDEX.tar.gz \;
 
           mkdir -p "/tmp/gh-pages/qualcommax/ipq60xx/${RELEASE_TAG}"
           cp bin/targets/qualcommax/ipq60xx/packages/*.apk \
