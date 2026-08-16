@@ -19,7 +19,20 @@ if [ -f /etc/config/cpufreq ]; then
     uci set cpufreq.@cpufreq[0].minfreq0='864000'
     uci set cpufreq.@cpufreq[0].maxfreq0='1512000'
     uci commit cpufreq
+    /etc/init.d/cpufreq enable 2>/dev/null
 fi
+
+cat << "EOF" > /etc/rc.local
+# Put your custom commands here that should be executed once
+# the system init finished. By default this file does nothing.
+
+echo schedutil > /sys/devices/system/cpu/cpufreq/policy0/scaling_governor 2>/dev/null
+/etc/init.d/cpufreq enable 2>/dev/null
+/etc/init.d/cpufreq start 2>/dev/null
+
+exit 0
+EOF
+chmod +x /etc/rc.local
 
 # 4. zRAM Memory Compression Tuning (256MB, lzo-rle, swappiness=60)
 if [ -f /etc/config/zram ]; then
