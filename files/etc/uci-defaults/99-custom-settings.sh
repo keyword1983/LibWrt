@@ -1,8 +1,16 @@
 #!/bin/sh
 # 99-custom-settings.sh - First boot initial configuration script for OpenWrt build
 
-# 1. Enable IGMP Snooping on br-lan for multicast and game streaming optimization
+# 1. Enable IGMP Snooping and WAN metrics for mwan3 failover
 uci set network.@device[0].igmp_snooping='1'
+uci set network.wan.metric='1'
+if uci get network.usb_wan >/dev/null 2>&1; then
+    uci set network.usb_wan.metric='2'
+fi
+if uci get network.mm_wan >/dev/null 2>&1; then
+    uci set network.mm_wan.metric='3'
+fi
+uci commit network
 
 # 2. Add usb_wan and mm_wan to Firewall WAN zone
 if [ -f /etc/config/firewall ]; then
