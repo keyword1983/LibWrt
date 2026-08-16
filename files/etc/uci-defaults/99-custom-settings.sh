@@ -72,23 +72,46 @@ if [ -f /etc/config/dropbear ]; then
     uci commit dropbear
 fi
 
-# 8. AdGuard Home Filter Slimming (anti-AD + OISD Small + AdGuard + AdAway)
+# 7. AdGuard Home Slim Filter List Pre-baking (anti-AD + OISD Small + AdGuard DNS)
 if [ -f /etc/adguardhome/adguardhome.yaml ]; then
-    python3 -c "
+    cat << "EOF" > /tmp/update_agh_filters.py
 import yaml
-path = '/etc/adguardhome/adguardhome.yaml'
+
+config_path = "/etc/adguardhome/adguardhome.yaml"
 try:
-    cfg = yaml.safe_load(open(path))
-    cfg['filters'] = [
-        {'enabled': True, 'url': 'https://adguardteam.github.io/HostlistsRegistry/assets/filter_1.txt', 'name': 'AdGuard DNS filter', 'id': 1},
-        {'enabled': True, 'url': 'https://adguardteam.github.io/HostlistsRegistry/assets/filter_2.txt', 'name': 'AdAway Default Blocklist', 'id': 2},
-        {'enabled': True, 'url': 'https://small.oisd.nl', 'name': 'OISD Blocklist Small (Router Optimized)', 'id': 3},
-        {'enabled': True, 'url': 'https://anti-ad.net/easylist.txt', 'name': 'anti-AD Filter (Taiwan/Asia Optimized)', 'id': 4}
+    with open(config_path, "r") as f:
+        cfg = yaml.safe_load(f)
+
+    slim_filters = [
+        {
+            "enabled": True,
+            "url": "https://anti-ad.net/easylist.txt",
+            "name": "anti-AD Filter (亞洲/台灣網頁廣告防護)",
+            "id": 1
+        },
+        {
+            "enabled": True,
+            "url": "https://small.oisd.nl",
+            "name": "OISD Small (精準輕量黑名單)",
+            "id": 2
+        },
+        {
+            "enabled": True,
+            "url": "https://adguardteam.github.io/HostlistsRegistry/assets/filter_1.txt",
+            "name": "AdGuard DNS filter",
+            "id": 3
+        }
     ]
-    yaml.safe_dump(cfg, open(path, 'w'), sort_keys=False)
+
+    cfg["filters"] = slim_filters
+
+    with open(config_path, "w") as f:
+        yaml.dump(cfg, f, default_flow_style=False, allow_unicode=True)
 except Exception:
     pass
-" 2>/dev/null
+EOF
+    python3 /tmp/update_agh_filters.py 2>/dev/null
+    rm -f /tmp/update_agh_filters.py
 fi
 
 # Apply all network commits
