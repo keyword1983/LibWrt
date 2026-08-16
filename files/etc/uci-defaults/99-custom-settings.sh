@@ -3,9 +3,17 @@
 
 # 1. Enable IGMP Snooping on br-lan for multicast and game streaming optimization
 uci set network.@device[0].igmp_snooping='1'
-uci commit network
 
-# 2. CPU Frequency Tuning (schedutil governor: 864MHz to 1512MHz)
+# 2. Add usb_wan and mm_wan to Firewall WAN zone
+if [ -f /etc/config/firewall ]; then
+    uci del_list firewall.@zone[1].network='usb_wan' 2>/dev/null
+    uci del_list firewall.@zone[1].network='mm_wan' 2>/dev/null
+    uci add_list firewall.@zone[1].network='usb_wan'
+    uci add_list firewall.@zone[1].network='mm_wan'
+    uci commit firewall
+fi
+
+# 3. CPU Frequency Tuning (schedutil governor: 864MHz to 1512MHz)
 if [ -f /etc/config/cpufreq ]; then
     uci set cpufreq.@cpufreq[0].governor0='schedutil'
     uci set cpufreq.@cpufreq[0].minfreq0='864000'
@@ -13,20 +21,23 @@ if [ -f /etc/config/cpufreq ]; then
     uci commit cpufreq
 fi
 
-# 3. zRAM Memory Compression Tuning (256MB, lzo-rle, swappiness=60)
+# 4. zRAM Memory Compression Tuning (256MB, lzo-rle, swappiness=60)
 if [ -f /etc/config/zram ]; then
     uci set zram.@zram[0].size='256'
     uci set zram.@zram[0].comp_alg='lzo-rle'
     uci commit zram
 fi
 
-if grep -q "vm.swappiness" /etc/sysctl.conf; then
-    sed -i 's/vm.swappiness=.*/vm.swappiness=60/' /etc/sysctl.conf
-else
-    echo "vm.swappiness=60" >> /etc/sysctl.conf
-fi
+# 5. Network Performance & TCP BBR Tuning
+cat << "EOF" >> /etc/sysctl.conf
+vm.swappiness=60
+net.core.default_qdisc=fq
+net.ipv4.tcp_congestion_control=bbr
+net.ipv4.tcp_fastopen=3
+EOF
+sysctl -p /etc/sysctl.conf 2>/dev/null
 
-# 4. MiniDLNA Configuration (Port 8200, 180s Samsung TV SSDP notify)
+# 6. MiniDLNA Configuration (Port 8200, 180s Samsung TV SSDP notify)
 if [ -f /etc/config/minidlna ]; then
     uci set minidlna.config.port='8200'
     uci set minidlna.config.enabled='1'
@@ -34,13 +45,13 @@ if [ -f /etc/config/minidlna ]; then
     uci commit minidlna
 fi
 
-# 5. Dropbear SSH Interface Unbind (Ensure LAN SSH access)
+# 7. Dropbear SSH Interface Unbind (Ensure LAN SSH access)
 if [ -f /etc/config/dropbear ]; then
     uci set dropbear.@dropbear[0].Interface=''
     uci commit dropbear
 fi
 
-# 6. AdGuard Home Filter Slimming (anti-AD + OISD Small + AdGuard + AdAway)
+# 8. AdGuard Home Filter Slimming (anti-AD + OISD Small + AdGuard + AdAway)
 if [ -f /etc/adguardhome/adguardhome.yaml ]; then
     python3 -c "
 import yaml
@@ -58,5 +69,8 @@ except Exception:
     pass
 " 2>/dev/null
 fi
+
+# Apply all network commits
+uci commit network
 
 exit 0
