@@ -59,6 +59,11 @@ net.ipv4.tcp_keepalive_time=30
 net.ipv4.tcp_keepalive_intvl=5
 net.ipv4.tcp_keepalive_probes=3
 net.ipv4.tcp_fin_timeout=15
+net.ipv4.tcp_mtu_probing=1
+net.core.netdev_max_backlog=10000
+net.ipv4.tcp_slow_start_after_idle=0
+net.ipv4.tcp_rmem=4096 87380 16777216
+net.ipv4.tcp_wmem=4096 65536 16777216
 EOF
 sysctl -p /etc/sysctl.conf 2>/dev/null
 
