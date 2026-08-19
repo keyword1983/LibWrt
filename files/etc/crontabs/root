@@ -1,0 +1,4 @@
+0 3 * * 1,3,5 /usr/bin/smart-reboot.sh
+0 4 * * * sync && echo 3 > /proc/sys/vm/drop_caches
+30 3 * * * /usr/bin/AdGuardHome --config /etc/adguardhome/adguardhome.yaml --work-dir /var/lib/adguardhome --update-rules 2>&1 | logger -t AGH-Update
+15 4 * * * rm -rf /tmp/alist* /tmp/filebrowser* /tmp/*.log 2>/dev/null
