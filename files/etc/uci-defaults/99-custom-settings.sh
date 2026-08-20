@@ -134,10 +134,12 @@ fi
 # Auto-heal mwan3 status on boot to clear nftables mangle conflict
 if [ -f /etc/rc.local ]; then
     sed -i '/exit 0/i (sleep 15 && nft delete table ip mangle 2>/dev/null && /etc/init.d/mwan3 restart) &' /etc/rc.local 2>/dev/null || true
+    sed -i '/exit 0/i echo 2048 > /sys/block/sda/queue/read_ahead_kb 2>/dev/null' /etc/rc.local 2>/dev/null || true
 fi
 
 # Apply all network commits
 uci commit network
 
 exit 0
+
 
