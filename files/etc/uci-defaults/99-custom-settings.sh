@@ -135,19 +135,20 @@ fi
 if [ -f /etc/rc.local ]; then
     sed -i '/exit 0/i (sleep 15 && nft delete table ip mangle 2>/dev/null && /etc/init.d/mwan3 restart) &' /etc/rc.local 2>/dev/null || true
     sed -i '/exit 0/i echo 2048 > /sys/block/sda/queue/read_ahead_kb 2>/dev/null' /etc/rc.local 2>/dev/null || true
-    sed -i '/exit 0/i (sleep 10 && echo schedutil > /sys/devices/system/cpu/cpufreq/policy0/scaling_governor && echo 864000 > /sys/devices/system/cpu/cpufreq/policy0/scaling_min_freq) &' /etc/rc.local 2>/dev/null || true
+    sed -i '/exit 0/i (sleep 10 && echo schedutil > /sys/devices/system/cpu/cpufreq/policy0/scaling_governor && echo 864000 > /sys/devices/system/cpu/cpufreq/policy0/scaling_min_freq && echo 1200000 > /sys/devices/system/cpu/cpufreq/policy0/scaling_max_freq) &' /etc/rc.local 2>/dev/null || true
 fi
 
-# Configure CPU frequency scaling governor to schedutil
+# Configure CPU frequency scaling governor to schedutil (Sweet-spot cap: 1.2GHz)
 uci set cpufreq.cpufreq.governor0='schedutil' 2>/dev/null || true
 uci set cpufreq.cpufreq.minfreq0='864000' 2>/dev/null || true
-uci set cpufreq.cpufreq.maxfreq0='1512000' 2>/dev/null || true
+uci set cpufreq.cpufreq.maxfreq0='1200000' 2>/dev/null || true
 uci commit cpufreq 2>/dev/null || true
 
 # Apply all network commits
 uci commit network
 
 exit 0
+
 
 
 
