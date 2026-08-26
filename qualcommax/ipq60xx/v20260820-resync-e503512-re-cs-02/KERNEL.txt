@@ -1,0 +1,2 @@
+firmware release: v20260820-resync-e503512-re-cs-02
+built by: GitHub Actions run 32985724614 (2026-08-26T17:24:42Z)
