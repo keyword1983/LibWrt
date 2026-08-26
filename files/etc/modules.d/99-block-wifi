@@ -1,0 +1,6 @@
+blacklist ath11k
+blacklist ath11k_pci
+blacklist ath11k_ahb
+blacklist mac80211
+blacklist cfg80211
+blacklist qca_nss_wifi_meshmgr
