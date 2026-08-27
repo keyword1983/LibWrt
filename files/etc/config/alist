@@ -1,0 +1,3 @@
+config alist 'config'
+	option enabled '0'
+	option port '5244'

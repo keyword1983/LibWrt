@@ -1,0 +1,9 @@
+# Put your custom commands here that should be executed once
+# the system init finished. By default this file does nothing.
+
+echo schedutil > /sys/devices/system/cpu/cpufreq/policy0/scaling_governor 2>/dev/null
+echo 2048 > /sys/block/mmcblk0/queue/read_ahead_kb 2>/dev/null
+echo 2048 > /sys/block/sda/queue/read_ahead_kb 2>/dev/null
+
+mount -t ntfs3 -o force,iocharset=utf8 /dev/sda2 /mnt/sda2 2>/dev/null
+exit 0
