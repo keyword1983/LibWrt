@@ -1,0 +1,4 @@
+[ "$ACTION" = "add" ] && [ "$DEVICE" = "sda2" ] && {
+    logger -t minidlna-hotplug "External hard drive sda2 mounted, restarting minidlna..."
+    /etc/init.d/minidlna restart
+}
