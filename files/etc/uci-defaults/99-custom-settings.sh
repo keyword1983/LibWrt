@@ -30,17 +30,7 @@ if [ -f /etc/config/cpufreq ]; then
     /etc/init.d/cpufreq enable 2>/dev/null
 fi
 
-cat << "EOF" > /etc/rc.local
-# Put your custom commands here that should be executed once
-# the system init finished. By default this file does nothing.
 
-echo schedutil > /sys/devices/system/cpu/cpufreq/policy0/scaling_governor 2>/dev/null
-/etc/init.d/cpufreq enable 2>/dev/null
-/etc/init.d/cpufreq start 2>/dev/null
-
-exit 0
-EOF
-chmod +x /etc/rc.local
 
 # 4. zRAM Memory Compression Tuning (256MB, lzo-rle, swappiness=60)
 if [ -f /etc/config/zram ]; then
@@ -131,19 +121,12 @@ EOF
     rm -f /tmp/update_agh_filters.py
 fi
 
-# Auto-heal mwan3 status on boot to clear nftables mangle conflict
-if [ -f /etc/rc.local ]; then
-    sed -i '/exit 0/i (sleep 15 && nft delete table ip mangle 2>/dev/null && /etc/init.d/mwan3 restart) &' /etc/rc.local 2>/dev/null || true
-    sed -i '/exit 0/i echo 2048 > /sys/block/sda/queue/read_ahead_kb 2>/dev/null' /etc/rc.local 2>/dev/null || true
-    sed -i '/exit 0/i BOARD=$(cat /tmp/sysinfo/board_name 2>/dev/null); if [ "$BOARD" = "jdcloud,re-ss-01" ]; then (sleep 10 && echo schedutil > /sys/devices/system/cpu/cpufreq/policy0/scaling_governor && echo 864000 > /sys/devices/system/cpu/cpufreq/policy0/scaling_min_freq && echo 1200000 > /sys/devices/system/cpu/cpufreq/policy0/scaling_max_freq) & fi' /etc/rc.local 2>/dev/null || true
-fi
-
 # Configure CPU frequency scaling governor specifically for Arthur (jdcloud,re-ss-01)
 BOARD_NAME=$(cat /tmp/sysinfo/board_name 2>/dev/null || true)
 if [ "$BOARD_NAME" = "jdcloud,re-ss-01" ]; then
     uci set cpufreq.cpufreq.governor0='schedutil' 2>/dev/null || true
     uci set cpufreq.cpufreq.minfreq0='864000' 2>/dev/null || true
-    uci set cpufreq.cpufreq.maxfreq0='1200000' 2>/dev/null || true
+    uci set cpufreq.cpufreq.maxfreq0='1512000' 2>/dev/null || true
     uci commit cpufreq 2>/dev/null || true
 fi
 
