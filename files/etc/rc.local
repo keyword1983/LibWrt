@@ -6,4 +6,6 @@ echo 2048 > /sys/block/mmcblk0/queue/read_ahead_kb 2>/dev/null
 echo 2048 > /sys/block/sda/queue/read_ahead_kb 2>/dev/null
 
 mount -t ntfs3 -o force,iocharset=utf8 /dev/sda2 /mnt/sda2 2>/dev/null
+(sleep 5 && /etc/init.d/minidlna restart) &
+
 exit 0
