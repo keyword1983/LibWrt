@@ -8,7 +8,7 @@ config global
 
 config mount
 	option target '/mnt/sda2'
-	option uuid '24765793765764DA'
+	option device '/dev/sda2'
 	option enabled '1'
 	option fstype 'ntfs3'
 	option options 'rw,noatime,iocharset=utf8,uid=0,gid=0,umask=0000'
