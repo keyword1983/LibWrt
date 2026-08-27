@@ -119,12 +119,22 @@ except Exception:
     (python3 /tmp/update_agh_filters.py && rm -f /tmp/update_agh_filters.py) &
 fi
 
-# Configure CPU frequency scaling governor specifically for Arthur (jdcloud,re-ss-01)
+# Configure CPU frequency scaling governor for Arthur (re-ss-01) and Athena (re-cs-02)
 BOARD_NAME=$(cat /tmp/sysinfo/board_name 2>/dev/null || true)
+
+# Arthur (JDC AX1800 Pro): 864MHz to 1.200GHz
 if [ "$BOARD_NAME" = "jdcloud,re-ss-01" ]; then
     uci set cpufreq.cpufreq.governor0='schedutil' 2>/dev/null || true
     uci set cpufreq.cpufreq.minfreq0='864000' 2>/dev/null || true
-    uci set cpufreq.cpufreq.maxfreq0='1512000' 2>/dev/null || true
+    uci set cpufreq.cpufreq.maxfreq0='1200000' 2>/dev/null || true
+    uci commit cpufreq 2>/dev/null || true
+fi
+
+# Athena (JDC AX6600): 864MHz to 1.800GHz
+if [ "$BOARD_NAME" = "jdcloud,re-cs-02" ]; then
+    uci set cpufreq.cpufreq.governor0='schedutil' 2>/dev/null || true
+    uci set cpufreq.cpufreq.minfreq0='864000' 2>/dev/null || true
+    uci set cpufreq.cpufreq.maxfreq0='1800000' 2>/dev/null || true
     uci commit cpufreq 2>/dev/null || true
 fi
 
