@@ -1,0 +1,2 @@
+firmware release: v2026.08.27-optimized-re-cs-02
+built by: GitHub Actions run 33027069156 (2026-08-27T02:24:00Z)
