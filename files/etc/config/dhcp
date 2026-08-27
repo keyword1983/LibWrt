@@ -64,3 +64,7 @@ config host
 	option ip '192.168.1.101'
 	list mac 'c8:4a:a0:52:50:51'
 	option name 'PS5'
+
+config domain
+	option name 'tplogin.cn'
+	option ip '192.168.1.100'
