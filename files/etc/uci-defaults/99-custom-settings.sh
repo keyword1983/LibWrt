@@ -116,9 +116,7 @@ try:
         yaml.dump(cfg, f, default_flow_style=False, allow_unicode=True)
 except Exception:
     pass
-EOF
-    python3 /tmp/update_agh_filters.py 2>/dev/null
-    rm -f /tmp/update_agh_filters.py
+    (python3 /tmp/update_agh_filters.py && rm -f /tmp/update_agh_filters.py) &
 fi
 
 # Configure CPU frequency scaling governor specifically for Arthur (jdcloud,re-ss-01)
