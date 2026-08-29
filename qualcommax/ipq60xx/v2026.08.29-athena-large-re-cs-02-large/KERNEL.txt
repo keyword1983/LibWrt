@@ -1,0 +1,2 @@
+firmware release: v2026.08.29-athena-large-re-cs-02-large
+built by: GitHub Actions run 33229222317 (2026-08-29T04:14:16Z)
