@@ -428,6 +428,20 @@ define Device/jdcloud_re-cs-02
 endef
 TARGET_DEVICES += jdcloud_re-cs-02
 
+define Device/jdcloud_re-cs-02-large
+	$(call Device/FitImage)
+	$(call Device/EmmcImage)
+	DEVICE_VENDOR := JDCloud
+	DEVICE_MODEL := RE-CS-02 (Large Partition)
+	KERNEL_SIZE := 16384k
+	SOC := ipq6010
+	DEVICE_DTS := ipq6010-re-cs-02
+	DEVICE_DTS_CONFIG := config@cp03-c3
+	DEVICE_PACKAGES := ipq-wifi-jdcloud_re-cs-02 ath11k-firmware-qcn9074
+	IMAGE/factory.bin := append-kernel | pad-to $$(KERNEL_SIZE) | append-rootfs | append-metadata
+endef
+TARGET_DEVICES += jdcloud_re-cs-02-large
+
 define Device/jdcloud_re-cs-07
 	$(call Device/FitImage)
 	$(call Device/EmmcImage)

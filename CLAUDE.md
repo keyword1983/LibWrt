@@ -61,7 +61,8 @@ snapshot, not exhaustive):
 | Device symbol | DEVICE_MODEL | SoC | Notes |
 |---|---|---|---|
 | `jdcloud_re-ss-01` | RE-SS-01 | ipq6000 | This build's target (marketed as "AX1800 Pro") |
-| `jdcloud_re-cs-02` | RE-CS-02 | ipq6010 | Needs `ath11k-firmware-qcn9074` |
+| `jdcloud_re-cs-02` | RE-CS-02 | ipq6010 | Stock partition layout (6MB kernel), needs `ath11k-firmware-qcn9074` |
+| `jdcloud_re-cs-02-large` | RE-CS-02 (Large) | ipq6010 | Community large partition layout (16MB kernel) for modified U-Boot/GPT |
 | `jdcloud_re-cs-07` | RE-CS-07 | ipq6010 | Explicitly *excludes* ath11k/hostapd packages (see its `DEVICE_PACKAGES` — likely no built-in wifi, or a different wifi chip) |
 | `redmi_ax5-jdcloud` | Redmi AX5 JDCloud | ipq6000 | Different vendor branding, same JDCloud firmware lineage |
 

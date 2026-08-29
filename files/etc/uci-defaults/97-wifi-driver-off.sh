@@ -5,7 +5,7 @@
 
 BOARD_NAME=$(cat /tmp/sysinfo/board_name 2>/dev/null || true)
 
-# Only block Wi-Fi on Arthur (re-ss-01). Keep Wi-Fi enabled on Athena (re-cs-02) and other devices.
+# Only block Wi-Fi on Arthur (re-ss-01). Keep Wi-Fi enabled on Athena (re-cs-02 / re-cs-02-large) and other devices.
 if [ "$BOARD_NAME" != "jdcloud,re-ss-01" ]; then
 	exit 0
 fi

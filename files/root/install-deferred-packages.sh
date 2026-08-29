@@ -14,7 +14,21 @@
 
 set -e
 
-RELEASE_URL="https://github.com/keyword1983/LibWrt/releases/download/deferred-packages-jdc-ax1800pro/deferred-packages.tar.gz"
+BOARD_NAME=$(cat /tmp/sysinfo/board_name 2>/dev/null || echo "jdcloud,re-ss-01")
+
+case "$BOARD_NAME" in
+	"jdcloud,re-cs-02")
+		TAG_NAME="deferred-packages-jdc-re-cs-02"
+		;;
+	"jdcloud,re-cs-02-large")
+		TAG_NAME="deferred-packages-jdc-re-cs-02-large"
+		;;
+	*)
+		TAG_NAME="deferred-packages-jdc-ax1800pro"
+		;;
+esac
+
+RELEASE_URL="https://github.com/keyword1983/LibWrt/releases/download/${TAG_NAME}/deferred-packages.tar.gz"
 WORKDIR="/tmp/deferred-packages"
 
 OVERLAY_SIZE_KB=$(df -k /overlay | awk 'NR==2 {print $2}')
