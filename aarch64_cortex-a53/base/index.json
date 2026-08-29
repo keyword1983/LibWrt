@@ -4,8 +4,8 @@
   "packages": {
     "6rd": "13",
     "apk-openssl": "3.0.5-r3",
-    "ath11k-firmware-ipq6018": "2026.03.21~e853ab3f-r1",
-    "ath11k-firmware-qcn9074": "2026.03.21~e853ab3f-r1",
+    "ath11k-firmware-ipq6018": "2026.08.21~0c817c46-r1",
+    "ath11k-firmware-qcn9074": "2026.08.21~0c817c46-r1",
     "busybox": "1.38.0-r2",
     "ca-bundle": "20260601-r1",
     "cpufreq": "1",

@@ -1,0 +1,2 @@
+firmware release: v2026.08.29-synced-re-cs-02
+built by: GitHub Actions run 33227670539 (2026-08-29T03:18:51Z)
