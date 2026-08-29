@@ -6,7 +6,10 @@ set -e
 
 rm -rf package/openwrt-passwall package/luci-app-passwall2 \
        package/app-store-ui package/istore-luci \
-       package/luci-app-tailscale package/luci-app-openvpn
+       package/luci-app-tailscale package/luci-app-openvpn \
+       package/athena-led
+
+git clone --depth=1 https://github.com/unraveloop/JDC-AX6600-Athena-LED-Controller package/athena-led
 
 git clone --depth=1 https://github.com/Openwrt-Passwall/openwrt-passwall-packages package/openwrt-passwall
 git clone --depth=1 https://github.com/Openwrt-Passwall/openwrt-passwall2 package/luci-app-passwall2
