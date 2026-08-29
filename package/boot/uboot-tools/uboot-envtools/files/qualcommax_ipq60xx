@@ -24,8 +24,6 @@ cmiot,ax18|\
 kt,ar06-012h|\
 lg,gapd-7500|\
 qihoo,360v6|\
-redmi,ax5|\
-xiaomi,ax1800|\
 zn,m2|\
 glinet,gl-ax1800|\
 glinet,gl-axt1800|\
@@ -43,6 +41,10 @@ tplink,eap623-outdoor-hd-v1|\
 tplink,eap620-hd-v3|\
 tplink,eap625-outdoor-hd-v1)
 	ubootenv_add_mtd "0:appsblenv" "0x0" "0x40000" "0x20000"
+	;;
+redmi,ax5|\
+xiaomi,ax1800)
+	ubootenv_add_mtd "0:appsblenv" "0x0" "0x10000" "0x20000"
 	;;
 yuncore,fap650)
 	ubootenv_add_mtd "0:appsblenv" "0x0" "0x10000" "0x10000"
