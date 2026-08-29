@@ -1,0 +1,2 @@
+firmware release: v2026.08.29-re-cs-02-large
+built by: GitHub Actions run 33229269977 (2026-08-29T04:23:41Z)
