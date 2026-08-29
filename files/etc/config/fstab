@@ -11,7 +11,7 @@ config mount
 	option device '/dev/sda2'
 	option enabled '1'
 	option fstype 'ntfs3'
-	option options 'rw,noatime,iocharset=utf8,uid=0,gid=0,umask=0000'
+	option options 'rw,noatime,iocharset=utf8,uid=0,gid=0,umask=0000,force'
 
 config swap
 	option device '/swapfile'

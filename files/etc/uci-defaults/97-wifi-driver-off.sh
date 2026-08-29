@@ -3,6 +3,13 @@
 # load the kmods at boot, to save RAM on a 512MB device that's used as a
 # wired-only gateway. Re-enabling later just needs LuCI + a reboot.
 
+BOARD_NAME=$(cat /tmp/sysinfo/board_name 2>/dev/null || true)
+
+# Only block Wi-Fi on Arthur (re-ss-01). Keep Wi-Fi enabled on Athena (re-cs-02) and other devices.
+if [ "$BOARD_NAME" != "jdcloud,re-ss-01" ]; then
+	exit 0
+fi
+
 for dev in $(uci show wireless 2>/dev/null | sed -n "s/^wireless\.\([^.]*\)=wifi-device$/\1/p"); do
 	uci set wireless.$dev.disabled='1'
 done

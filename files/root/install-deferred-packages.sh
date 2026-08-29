@@ -30,4 +30,13 @@ tar -xzf "$WORKDIR/deferred-packages.tar.gz" -C "$WORKDIR"
 apk add --allow-untrusted "$WORKDIR"/*.apk
 rm -rf "$WORKDIR"
 
+# Auto-configure Dnsmasq to forward all DNS queries to AdGuard Home (127.0.0.1#55) once installed
+if [ -x "/opt/bin/AdGuardHome" ] || [ -f "/etc/init.d/adguardhome" ]; then
+	uci del dhcp.@dnsmasq[0].server 2>/dev/null || true
+	uci add_list dhcp.@dnsmasq[0].server='127.0.0.1#55' 2>/dev/null || true
+	uci set dhcp.@dnsmasq[0].noresolv='1' 2>/dev/null || true
+	uci commit dhcp 2>/dev/null || true
+	/etc/init.d/dnsmasq restart 2>/dev/null || true
+fi
+
 echo "Done. luci-app-passwall2 / luci-app-adguardhome / luci-app-tailscale / ModemManager should now be visible in LuCI."

@@ -138,6 +138,25 @@ if [ "$BOARD_NAME" = "jdcloud,re-cs-02" ]; then
     uci commit cpufreq 2>/dev/null || true
 fi
 
+# Configure MiniDLNA media directories
+uci del minidlna.config.media_dir 2>/dev/null || true
+uci add_list minidlna.config.media_dir='V,/mnt/sda2/A' 2>/dev/null || true
+uci add_list minidlna.config.media_dir='V,/mnt/sda2/BaiduNetdiskDownload' 2>/dev/null || true
+uci commit minidlna 2>/dev/null || true
+
+# Safe crontab scheduled reboot (stop minidlna & umount /mnt/sda2 before reboot)
+mkdir -p /etc/crontabs
+echo '0 3 * * 1,3,5 /etc/init.d/minidlna stop && sync && umount /mnt/sda2 2>/dev/null && reboot' > /etc/crontabs/root
+/etc/init.d/cron restart 2>/dev/null || true
+
+# Configure Dnsmasq to forward DNS queries to AdGuard Home (127.0.0.1#55) ONLY if AdGuard Home is installed
+if [ -x "/opt/bin/AdGuardHome" ] || [ -f "/etc/init.d/adguardhome" ]; then
+	uci del dhcp.@dnsmasq[0].server 2>/dev/null || true
+	uci add_list dhcp.@dnsmasq[0].server='127.0.0.1#55' 2>/dev/null || true
+	uci set dhcp.@dnsmasq[0].noresolv='1' 2>/dev/null || true
+	uci commit dhcp 2>/dev/null || true
+fi
+
 # Apply all network commits
 uci commit network
 
