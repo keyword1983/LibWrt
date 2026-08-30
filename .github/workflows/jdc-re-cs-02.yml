@@ -38,7 +38,7 @@ jobs:
       - name: Set release tag
         run: |
           if [ -n "${{ github.ref_name }}" ] && [[ "${{ github.ref_name }}" == v* ]]; then
-            echo "RELEASE_TAG=${{ github.ref_name }}-re-cs-02" >> $GITHUB_ENV
+            echo "RELEASE_TAG=${{ github.ref_name }}-Athena-Stock" >> $GITHUB_ENV
           else
             echo "RELEASE_TAG=jdc-re-cs-02-$(date +%Y%m%d-%H%M)" >> $GITHUB_ENV
           fi
