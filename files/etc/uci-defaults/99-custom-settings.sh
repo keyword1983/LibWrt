@@ -157,11 +157,19 @@ if [ -x "/opt/bin/AdGuardHome" ] || [ -f "/etc/init.d/adguardhome" ]; then
 	uci commit dhcp 2>/dev/null || true
 fi
 
-# Static DHCP Host Bindings
-uci add dhcp host 2>/dev/null || true
-uci set dhcp.@host[-1].name='Samsung-Smart-M7' 2>/dev/null || true
-uci set dhcp.@host[-1].ip='192.168.1.238' 2>/dev/null || true
-uci set dhcp.@host[-1].mac='64:07:f6:4f:80:7c' 2>/dev/null || true
+# Static DHCP Host Bindings (Match by MAC address to prevent duplicates)
+if ! uci show dhcp | grep -i "64:07:f6:4f:80:7c" >/dev/null 2>&1; then
+    uci add dhcp host 2>/dev/null || true
+    uci set dhcp.@host[-1].name='Samsung-Smart-M7' 2>/dev/null || true
+    uci set dhcp.@host[-1].ip='192.168.1.238' 2>/dev/null || true
+    uci set dhcp.@host[-1].mac='64:07:f6:4f:80:7c' 2>/dev/null || true
+else
+    SECTION=$(uci show dhcp | grep -i "64:07:f6:4f:80:7c" | cut -d. -f1,2 | head -n 1)
+    if [ -n "$SECTION" ]; then
+        uci set ${SECTION}.name='Samsung-Smart-M7' 2>/dev/null || true
+        uci set ${SECTION}.ip='192.168.1.238' 2>/dev/null || true
+    fi
+fi
 
 # Apply all network commits
 uci commit dhcp 2>/dev/null || true
