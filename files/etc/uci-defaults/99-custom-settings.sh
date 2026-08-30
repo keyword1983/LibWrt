@@ -157,19 +157,27 @@ if [ -x "/opt/bin/AdGuardHome" ] || [ -f "/etc/init.d/adguardhome" ]; then
 	uci commit dhcp 2>/dev/null || true
 fi
 
-# Static DHCP Host Bindings (Match by MAC address to prevent duplicates)
-if ! uci show dhcp | grep -i "64:07:f6:4f:80:7c" >/dev/null 2>&1; then
-    uci add dhcp host 2>/dev/null || true
-    uci set dhcp.@host[-1].name='Samsung-Smart-M7' 2>/dev/null || true
-    uci set dhcp.@host[-1].ip='192.168.1.238' 2>/dev/null || true
-    uci set dhcp.@host[-1].mac='64:07:f6:4f:80:7c' 2>/dev/null || true
-else
-    SECTION=$(uci show dhcp | grep -i "64:07:f6:4f:80:7c" | cut -d. -f1,2 | head -n 1)
-    if [ -n "$SECTION" ]; then
-        uci set ${SECTION}.name='Samsung-Smart-M7' 2>/dev/null || true
-        uci set ${SECTION}.ip='192.168.1.238' 2>/dev/null || true
+# Static DHCP Host Bindings Helper (Match by MAC address to prevent duplicates)
+bind_static_host() {
+    local name="$1" mac="$2" ip="$3"
+    if ! uci show dhcp | grep -i "$mac" >/dev/null 2>&1; then
+        uci add dhcp host 2>/dev/null || true
+        uci set dhcp.@host[-1].name="$name" 2>/dev/null || true
+        uci set dhcp.@host[-1].ip="$ip" 2>/dev/null || true
+        uci set dhcp.@host[-1].mac="$mac" 2>/dev/null || true
+    else
+        local sec=$(uci show dhcp | grep -i "$mac" | cut -d. -f1,2 | head -n 1)
+        if [ -n "$sec" ]; then
+            uci set ${sec}.name="$name" 2>/dev/null || true
+            uci set ${sec}.ip="$ip" 2>/dev/null || true
+        fi
     fi
-fi
+}
+
+bind_static_host "Samsung-Smart-M7" "64:07:f6:4f:80:7c" "192.168.1.238"
+bind_static_host "iPad" "46:9b:9c:47:a8:cc" "192.168.1.201"
+bind_static_host "Lenovo-Pad" "a8:96:09:fc:80:4e" "192.168.1.133"
+bind_static_host "Nintendo-Switch" "ec:c4:0d:76:c7:98" "192.168.1.240"
 
 # Apply all network commits
 uci commit dhcp 2>/dev/null || true
