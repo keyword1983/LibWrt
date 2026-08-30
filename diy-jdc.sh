@@ -7,9 +7,13 @@ set -e
 rm -rf package/openwrt-passwall package/luci-app-passwall2 \
        package/app-store-ui package/istore-luci \
        package/luci-app-tailscale package/luci-app-openvpn \
-       package/athena-led
+       package/athena-led package/luci-app-athena-led
 
-git clone --depth=1 https://github.com/unraveloop/JDC-AX6600-Athena-LED-Controller package/athena-led
+git clone --depth=1 https://github.com/unraveloop/JDC-AX6600-Athena-LED-Controller /tmp/athena-led-src
+mkdir -p package/athena-led package/luci-app-athena-led
+cp -r /tmp/athena-led-src/athena-led/* package/athena-led/
+cp -r /tmp/athena-led-src/luci-app-athena-led/* package/luci-app-athena-led/
+rm -rf /tmp/athena-led-src
 
 git clone --depth=1 https://github.com/Openwrt-Passwall/openwrt-passwall-packages package/openwrt-passwall
 git clone --depth=1 https://github.com/Openwrt-Passwall/openwrt-passwall2 package/luci-app-passwall2
