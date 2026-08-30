@@ -157,7 +157,14 @@ if [ -x "/opt/bin/AdGuardHome" ] || [ -f "/etc/init.d/adguardhome" ]; then
 	uci commit dhcp 2>/dev/null || true
 fi
 
+# Static DHCP Host Bindings
+uci add dhcp host 2>/dev/null || true
+uci set dhcp.@host[-1].name='Samsung-Smart-M7' 2>/dev/null || true
+uci set dhcp.@host[-1].ip='192.168.1.238' 2>/dev/null || true
+uci set dhcp.@host[-1].mac='64:07:f6:4f:80:7c' 2>/dev/null || true
+
 # Apply all network commits
+uci commit dhcp 2>/dev/null || true
 uci commit network
 
 exit 0
