@@ -186,7 +186,6 @@ nft add set inet game_dscp_table streaming_af41_set '{ type ipv4_addr; flags tim
 nft flush chain inet game_dscp_table forward_dscp 2>/dev/null || true
 
 nft add rule inet game_dscp_table forward_dscp udp dport '{ 3074, 3478-3481, 5000-6000, 8000-9000, 8572, 8801-8802, 9296-9308, 10000-20000, 45000-65535 }' ip dscp set ef 2>/dev/null || true
-nft add rule inet game_dscp_table forward_dscp ip daddr 192.168.1.238 ip dscp set af41 2>/dev/null || true
 nft add rule inet game_dscp_table forward_dscp tcp dport 8200 ip dscp set af41 2>/dev/null || true
 nft add rule inet game_dscp_table forward_dscp ip daddr @streaming_af41_set ip dscp set af41 2>/dev/null || true
 
