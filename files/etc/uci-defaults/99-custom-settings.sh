@@ -179,6 +179,21 @@ bind_static_host "iPad" "46:9b:9c:47:a8:cc" "192.168.1.201"
 bind_static_host "Lenovo-Pad" "a8:96:09:fc:80:4e" "192.168.1.133"
 bind_static_host "Nintendo-Switch" "ec:c4:0d:76:c7:98" "192.168.1.240"
 
+# Setup Gaming (EF) & 4K Streaming (AF41) DSCP Rules in nftables
+nft add table inet game_dscp_table 2>/dev/null || true
+nft add chain inet game_dscp_table forward_dscp '{ type filter hook forward priority -150; }' 2>/dev/null || true
+nft add set inet game_dscp_table streaming_af41_set '{ type ipv4_addr; flags timeout; timeout 1d; }' 2>/dev/null || true
+nft flush chain inet game_dscp_table forward_dscp 2>/dev/null || true
+
+nft add rule inet game_dscp_table forward_dscp udp dport '{ 3074, 3478-3481, 5000-6000, 8000-9000, 8572, 8801-8802, 9296-9308, 10000-20000, 45000-65535 }' ip dscp set ef 2>/dev/null || true
+nft add rule inet game_dscp_table forward_dscp ip daddr 192.168.1.238 ip dscp set af41 2>/dev/null || true
+nft add rule inet game_dscp_table forward_dscp tcp dport 8200 ip dscp set af41 2>/dev/null || true
+nft add rule inet game_dscp_table forward_dscp ip daddr @streaming_af41_set ip dscp set af41 2>/dev/null || true
+
+# Bind Dnsmasq nftset for Netflix / YouTube / Disney+ CDN Domain Auto-Recognition
+uci del_list dhcp.@dnsmasq[0].nftset='/netflix.com/nflxvideo.net/nflxso.net/googlevideo.com/youtube.com/disneyplus.com/bamgrid.com/4#inet#game_dscp_table#streaming_af41_set' 2>/dev/null || true
+uci add_list dhcp.@dnsmasq[0].nftset='/netflix.com/nflxvideo.net/nflxso.net/googlevideo.com/youtube.com/disneyplus.com/bamgrid.com/4#inet#game_dscp_table#streaming_af41_set' 2>/dev/null || true
+
 # Apply all network commits
 uci commit dhcp 2>/dev/null || true
 uci commit network
