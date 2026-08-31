@@ -144,9 +144,9 @@ uci add_list minidlna.config.media_dir='V,/mnt/sda2/A' 2>/dev/null || true
 uci add_list minidlna.config.media_dir='V,/mnt/sda2/BaiduNetdiskDownload' 2>/dev/null || true
 uci commit minidlna 2>/dev/null || true
 
-# Safe crontab scheduled reboot (stop minidlna & umount /mnt/sda2 before reboot)
+# Safe crontab scheduled reboot (stop services & umount -l /mnt/sda2 before reboot)
 mkdir -p /etc/crontabs
-echo '0 3 * * 1,3,5 /etc/init.d/minidlna stop && sync && umount /mnt/sda2 2>/dev/null && reboot' > /etc/crontabs/root
+echo '0 3 * * 1,3,5 /etc/init.d/minidlna stop 2>/dev/null; /etc/init.d/alist stop 2>/dev/null; /etc/init.d/filebrowser stop 2>/dev/null; sync; umount -l /mnt/sda2 2>/dev/null; reboot' > /etc/crontabs/root
 /etc/init.d/cron restart 2>/dev/null || true
 
 # Configure Dnsmasq to forward DNS queries to AdGuard Home (127.0.0.1#55) ONLY if AdGuard Home is installed
