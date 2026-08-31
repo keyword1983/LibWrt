@@ -110,6 +110,24 @@ try:
         }
     ]
 
+    google_ad_rules = [
+        "||googleadservices.com^",
+        "||googlesyndication.com^",
+        "||doubleclick.net^",
+        "||admob.com^",
+        "||ads.google.com^",
+        "||adservice.google.com^",
+        "||adservice.google.com.tw^",
+        "||googleads.g.doubleclick.net^",
+        "||pagead2.googlesyndication.com^",
+        "||mobileads.google.com^"
+    ]
+    user_rules = cfg.get("user_rules", [])
+    for r in google_ad_rules:
+        if r not in user_rules:
+            user_rules.append(r)
+    cfg["user_rules"] = user_rules
+
     cfg["filters"] = slim_filters
 
     with open(config_path, "w") as f:
