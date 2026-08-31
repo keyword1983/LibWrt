@@ -144,6 +144,9 @@ uci add_list minidlna.config.media_dir='V,/mnt/sda2/A' 2>/dev/null || true
 uci add_list minidlna.config.media_dir='V,/mnt/sda2/BaiduNetdiskDownload' 2>/dev/null || true
 uci commit minidlna 2>/dev/null || true
 
+# Patch /etc/init.d/minidlna so every restart automatically carries -R incremental rescan parameter
+sed -i 's/procd_append_param command -S -f/procd_append_param command -S -R -f/' /etc/init.d/minidlna 2>/dev/null || true
+
 # Safe crontab scheduled reboot (stop services & umount -l /mnt/sda2 before reboot)
 mkdir -p /etc/crontabs
 echo '0 3 * * 1,3,5 /etc/init.d/minidlna stop 2>/dev/null; /etc/init.d/alist stop 2>/dev/null; /etc/init.d/filebrowser stop 2>/dev/null; sync; umount -l /mnt/sda2 2>/dev/null; reboot' > /etc/crontabs/root
