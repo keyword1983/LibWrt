@@ -130,6 +130,15 @@ try:
 
     cfg["filters"] = slim_filters
 
+    dns = cfg.get("dns", {})
+    dns["cache_size"] = 16777216  # 16MB RAM cache (~80,000 domains)
+    dns["cache_ttl_min"] = 1800   # Min 30-min TTL
+    dns["cache_ttl_max"] = 86400
+    dns["cache_optimistic"] = True
+    dns["cache_optimistic_answer_ttl"] = "60s"
+    dns["cache_optimistic_max_age"] = "24h"
+    cfg["dns"] = dns
+
     with open(config_path, "w") as f:
         yaml.dump(cfg, f, default_flow_style=False, allow_unicode=True)
 except Exception:
