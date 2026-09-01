@@ -185,6 +185,7 @@ if [ -x "/opt/bin/AdGuardHome" ] || [ -f "/etc/init.d/adguardhome" ]; then
 	uci del dhcp.@dnsmasq[0].server 2>/dev/null || true
 	uci add_list dhcp.@dnsmasq[0].server='127.0.0.1#55' 2>/dev/null || true
 	uci add_list dhcp.@dnsmasq[0].server='168.95.1.1' 2>/dev/null || true
+	uci add_list dhcp.@dnsmasq[0].server='8.8.8.8' 2>/dev/null || true
 	uci commit dhcp 2>/dev/null || true
 fi
 
