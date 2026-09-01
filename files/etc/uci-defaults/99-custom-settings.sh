@@ -142,8 +142,7 @@ try:
     with open(config_path, "w") as f:
         yaml.dump(cfg, f, default_flow_style=False, allow_unicode=True)
 except Exception:
-    pass
-    (python3 /tmp/update_agh_filters.py && rm -f /tmp/update_agh_filters.py) &
+    (python3 /tmp/update_agh_filters.py && rm -f /tmp/update_agh_filters.py && /etc/init.d/adguardhome restart) &
 fi
 
 # Configure CPU frequency scaling governor for Arthur (re-ss-01) and Athena (re-cs-02)
