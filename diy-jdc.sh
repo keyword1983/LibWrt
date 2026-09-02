@@ -59,3 +59,11 @@ mkdir -p package/istore-luci
 cp -r /tmp/istore/luci/* package/istore-luci/
 
 rm -rf /tmp/istore-ui /tmp/istore
+
+# Clone Athena LED Controller (luci-app-athena-led only, Makefile auto-fetches prebuilt Rust binary)
+rm -rf package/athena-led package/luci-app-athena-led /tmp/athena-led-repo
+git clone --depth 1 https://github.com/unraveloop/JDC-AX6600-Athena-LED-Controller.git /tmp/athena-led-repo
+if [ -d "/tmp/athena-led-repo/luci-app-athena-led" ]; then
+    cp -r /tmp/athena-led-repo/luci-app-athena-led package/luci-app-athena-led
+fi
+rm -rf /tmp/athena-led-repo
