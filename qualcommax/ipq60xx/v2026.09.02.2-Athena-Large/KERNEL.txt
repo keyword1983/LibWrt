@@ -1,0 +1,2 @@
+firmware release: v2026.09.02.2-Athena-Large
+built by: GitHub Actions run 33625154725 (2026-09-02T12:32:43Z)
