@@ -7,6 +7,16 @@ anyone's personal infrastructure. Local-only connection details (dev VM, physica
 live in `LOCAL-DEV-NOTES.md`, which is gitignored — check there first if you need to reach the
 live test environment for this project, and never copy its contents into anything committed.
 
+## 核心工作規範 (Core Operating Rules)
+1. **先思考、先規劃、回報計畫，待確認後才執行 (Think, Plan, Report & Confirm First)**:
+   - 任何涉及修改檔案、執行具變更性指令、推送 Git/GitHub、或更動硬體/網路設定的操作，**嚴禁未經確認直接動手實作**。
+   - 先透過唯讀指令完成診斷與分析，提出條理清晰的實施計畫回報給使用者，**必須等待使用者明確確認（如「好」、「確認」、「執行」）後才開始落地實作**。
+2. **外部專案參考規範：深入原始碼比對，嚴禁臆測 (Deep Reference Analysis)**:
+   - 當使用者指示「參考某專案」、「參考某版本」或特定外部倉庫時，**嚴禁臆測或擅自替換為其他專案**。
+   - 必須第一時間直接調閱該指定專案的目錄結構、原始碼檔案、`Makefile`、依賴關聯與編譯流程，具體比對差異並回報，確認後再行實作。
+3. **系統服務規範：遵守官方標準流程 (Standard Service Management)**:
+   - 涉及 OpenWrt / Linux 服務時，一律使用官方標準服務命令（如 `/etc/init.d/<service>`、`uci`），嚴禁直接隨意使用 `killall` 或手動背景拉起二進位檔，防止守護進程（如 `procd`）衝突。
+
 ## What this repo is
 
 A LibWrt (OpenWrt/ImmortalWrt-derived, NSS-enabled) source tree, customized on the
