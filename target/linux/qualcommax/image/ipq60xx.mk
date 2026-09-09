@@ -433,7 +433,7 @@ define Device/jdcloud_re-cs-02-large
 	$(call Device/EmmcImage)
 	DEVICE_VENDOR := JDCloud
 	DEVICE_MODEL := RE-CS-02 (Large Partition)
-	KERNEL_SIZE := 16384k
+	KERNEL_SIZE := 6144k
 	SOC := ipq6010
 	DEVICE_DTS := ipq6010-re-cs-02
 	DEVICE_DTS_CONFIG := config@cp03-c3
