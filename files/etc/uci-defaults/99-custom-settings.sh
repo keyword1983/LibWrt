@@ -40,6 +40,7 @@ if [ -f /etc/config/zram ]; then
 fi
 
 # 5. Network Performance & Enterprise TCP Tuning
+if ! grep -q "net.ipv4.tcp_congestion_control=bbr" /etc/sysctl.conf 2>/dev/null; then
 cat << "EOF" >> /etc/sysctl.conf
 vm.swappiness=60
 net.core.default_qdisc=fq
@@ -63,6 +64,7 @@ net.core.rmem_max=16777216
 net.core.wmem_max=16777216
 net.ipv4.tcp_rfc1337=1
 EOF
+fi
 sysctl -p /etc/sysctl.conf 2>/dev/null
 
 # 6. MiniDLNA Configuration (Port 8200, 180s Samsung TV SSDP notify)
@@ -79,70 +81,105 @@ if [ -f /etc/config/dropbear ]; then
     uci commit dropbear
 fi
 
-# 7. AdGuard Home Slim Filter List Pre-baking (anti-AD + OISD Small + AdGuard DNS)
+# 7. AdGuard Home Filter List Pre-baking (AWAvenue + DaSheng + AdGuard Mobile + anti-AD + AdGuard DNS + User Rules)
 if [ -f /etc/adguardhome/adguardhome.yaml ]; then
     cat << "EOF" > /tmp/update_agh_filters.py
-import yaml
+import re
+import os
 
 config_path = "/etc/adguardhome/adguardhome.yaml"
+if not os.path.exists(config_path):
+    exit(0)
+
 try:
-    with open(config_path, "r") as f:
-        cfg = yaml.safe_load(f)
+    with open(config_path, "r", encoding="utf-8") as f:
+        content = f.read()
 
-    slim_filters = [
-        {
-            "enabled": True,
-            "url": "https://anti-ad.net/easylist.txt",
-            "name": "anti-AD Filter (亞洲/台灣網頁廣告防護)",
-            "id": 1
-        },
-        {
-            "enabled": True,
-            "url": "https://small.oisd.nl",
-            "name": "OISD Small (精準輕量黑名單)",
-            "id": 2
-        },
-        {
-            "enabled": True,
-            "url": "https://adguardteam.github.io/HostlistsRegistry/assets/filter_1.txt",
-            "name": "AdGuard DNS filter",
-            "id": 3
-        }
-    ]
+    new_filters = """filters:
+  - enabled: true
+    url: https://adguardteam.github.io/HostlistsRegistry/assets/filter_2.txt
+    name: AdAway Default Blocklist
+    id: 2
+  - enabled: true
+    url: https://anti-ad.net/easylist.txt
+    name: anti-AD Filter (亞洲/台灣網頁廣告防護)
+    id: 4
+  - enabled: true
+    url: https://raw.githubusercontent.com/TG-Twilight/AWAvenue-Ads-Rule/main/AWAvenue-Ads-Rule.txt
+    name: AWAvenue 秋風廣告規則 (移動端開屏與應用推薦防護)
+    id: 5
+  - enabled: true
+    url: https://raw.githubusercontent.com/jdlingyu/ad-wars/master/hosts
+    name: 大聖淨網 (小說漫畫彈窗與推薦防護)
+    id: 6
+  - enabled: true
+    url: https://adguardteam.github.io/HostlistsRegistry/assets/filter_11.txt
+    name: AdGuard Mobile Ads filter (移動設備廣告過濾)
+    id: 7
+  - enabled: true
+    url: https://adguardteam.github.io/HostlistsRegistry/assets/filter_1.txt
+    name: AdGuard DNS filter (基礎防護)
+    id: 8"""
 
-    google_ad_rules = [
-        "||googleadservices.com^",
-        "||googlesyndication.com^",
-        "||doubleclick.net^",
-        "||admob.com^",
-        "||ads.google.com^",
-        "||adservice.google.com^",
-        "||adservice.google.com.tw^",
-        "||googleads.g.doubleclick.net^",
-        "||pagead2.googlesyndication.com^",
-        "||mobileads.google.com^"
-    ]
-    user_rules = cfg.get("user_rules", [])
-    for r in google_ad_rules:
-        if r not in user_rules:
-            user_rules.append(r)
-    cfg["user_rules"] = user_rules
+    new_user_rules = """user_rules:
+  - '||googleads.g.doubleclick.net^'
+  - '||pagead2.googlesyndication.com^'
+  - '||adservice.google.com^'
+  - '||adservice.google.com.tw^'
+  - '||mobileads.google.com^'
+  - '||googleadservices.google.com^'
+  - '||app-measurement.com^'
+  - '||ad.xiaomi.com^'
+  - '||ad1.xiaomi.com^'
+  - '||tracking.miui.com^'
+  - '||telemetry.mshome.net^'
+  - '||pangle.io^'
+  - '||tiktokpangle.us^'
+  - '||byteoversea.com^'
+  - '||pangolin-sdk-toutiao.com^'
+  - '||pangolin-sdk-toutiao-b.com^'
+  - '||tobapplog.com^'
+  - '||pglstatp-toutiao.com^'
+  - '||gdt.qq.com^'
+  - '||e.qq.com^'
+  - '||adkwai.com^'
+  - '||exoclick.com^'
+  - '||exosrv.com^'
+  - '||popads.net^'
+  - '||popcash.net^'
+  - '||adsterra.com^'
+  - '||clickadu.com^'
+  - '||applvn.com^'
+  - '||applovin.com^'
+  - '||mintegral.com^'
+  - '||ironsrc.com^'
+  - '||unityads.unity3d.com^'
+  - '||supersonicads.com^'
+  - '||vungle.com^'
+  - '||adjoe.zone^'
+  - '||admob.com^'
+  - '||ads.google.com^'
+  - '||doubleclick.net^'
+  - '||googleadservices.com^'
+  - '||googlesyndication.com^'"""
 
-    cfg["filters"] = slim_filters
+    if 'filters:' in content:
+        content = re.sub(r'filters:.*?(?=\nwhitelist_filters:)', new_filters, content, flags=re.DOTALL)
+    if 'user_rules:' in content:
+        content = re.sub(r'user_rules:.*?(?=\ndhcp:)', new_user_rules, content, flags=re.DOTALL)
 
-    dns = cfg.get("dns", {})
-    dns["cache_size"] = 16777216  # 16MB RAM cache (~80,000 domains)
-    dns["cache_ttl_min"] = 1800   # Min 30-min TTL
-    dns["cache_ttl_max"] = 86400
-    dns["cache_optimistic"] = True
-    dns["cache_optimistic_answer_ttl"] = "60s"
-    dns["cache_optimistic_max_age"] = "24h"
-    cfg["dns"] = dns
+    content = re.sub(r'cache_size: \d+', 'cache_size: 16777216', content)
+    content = re.sub(r'cache_ttl_min: \d+', 'cache_ttl_min: 1800', content)
+    content = re.sub(r'cache_optimistic: \w+', 'cache_optimistic: true', content)
 
-    with open(config_path, "w") as f:
-        yaml.dump(cfg, f, default_flow_style=False, allow_unicode=True)
+    with open(config_path, "w", encoding="utf-8") as f:
+        f.write(content)
 except Exception:
-    (python3 /tmp/update_agh_filters.py && rm -f /tmp/update_agh_filters.py && /etc/init.d/adguardhome restart) &
+    pass
+EOF
+    python3 /tmp/update_agh_filters.py 2>/dev/null || true
+    rm -f /tmp/update_agh_filters.py
+    /etc/init.d/adguardhome restart 2>/dev/null || true
 fi
 
 # Configure CPU frequency scaling governor for Arthur (re-ss-01) and Athena (re-cs-02)
@@ -178,9 +215,11 @@ mkdir -p /etc/crontabs
 echo '0 3 * * 1,3,5 /etc/init.d/minidlna stop 2>/dev/null; /etc/init.d/alist stop 2>/dev/null; /etc/init.d/filebrowser stop 2>/dev/null; sync; umount -l /mnt/sda2 2>/dev/null; reboot' > /etc/crontabs/root
 /etc/init.d/cron restart 2>/dev/null || true
 
-# Configure Dnsmasq to forward DNS queries to AdGuard Home (127.0.0.1#55) with fallback (168.95.1.1) and high concurrency (1000)
+# Configure Dnsmasq to forward DNS queries to AdGuard Home (127.0.0.1#55) with strict-order fallback (168.95.1.1, 8.8.8.8) and high concurrency (1000)
 if [ -x "/opt/bin/AdGuardHome" ] || [ -f "/etc/init.d/adguardhome" ]; then
 	uci set dhcp.@dnsmasq[0].dns_forward_max='1000' 2>/dev/null || true
+	uci set dhcp.@dnsmasq[0].strictorder='1' 2>/dev/null || true
+	uci set dhcp.@dnsmasq[0].noresolv='1' 2>/dev/null || true
 	uci del dhcp.@dnsmasq[0].server 2>/dev/null || true
 	uci add_list dhcp.@dnsmasq[0].server='127.0.0.1#55' 2>/dev/null || true
 	uci add_list dhcp.@dnsmasq[0].server='168.95.1.1' 2>/dev/null || true
