@@ -49,6 +49,8 @@ if [ -x "/opt/bin/AdGuardHome" ] || [ -f "/etc/init.d/adguardhome" ]; then
 	uci set dhcp.@dnsmasq[0].dns_forward_max='1000' 2>/dev/null || true
 	uci set dhcp.@dnsmasq[0].strictorder='1' 2>/dev/null || true
 	uci set dhcp.@dnsmasq[0].noresolv='1' 2>/dev/null || true
+	uci set dhcp.@dnsmasq[0].addsubnet='32,128' 2>/dev/null || true
+	uci set dhcp.@dnsmasq[0].addmac='1' 2>/dev/null || true
 	uci del dhcp.@dnsmasq[0].server 2>/dev/null || true
 	uci add_list dhcp.@dnsmasq[0].server='127.0.0.1#55' 2>/dev/null || true
 	uci add_list dhcp.@dnsmasq[0].server='168.95.1.1' 2>/dev/null || true

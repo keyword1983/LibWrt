@@ -220,6 +220,8 @@ if [ -x "/opt/bin/AdGuardHome" ] || [ -f "/etc/init.d/adguardhome" ]; then
 	uci set dhcp.@dnsmasq[0].dns_forward_max='1000' 2>/dev/null || true
 	uci set dhcp.@dnsmasq[0].strictorder='1' 2>/dev/null || true
 	uci set dhcp.@dnsmasq[0].noresolv='1' 2>/dev/null || true
+	uci set dhcp.@dnsmasq[0].addsubnet='32,128' 2>/dev/null || true
+	uci set dhcp.@dnsmasq[0].addmac='1' 2>/dev/null || true
 	uci del dhcp.@dnsmasq[0].server 2>/dev/null || true
 	uci add_list dhcp.@dnsmasq[0].server='127.0.0.1#55' 2>/dev/null || true
 	uci add_list dhcp.@dnsmasq[0].server='168.95.1.1' 2>/dev/null || true
@@ -248,6 +250,7 @@ bind_static_host "Samsung-Smart-M7" "64:07:f6:4f:80:7c" "192.168.1.238"
 bind_static_host "iPad" "46:9b:9c:47:a8:cc" "192.168.1.201"
 bind_static_host "Lenovo-Pad" "a8:96:09:fc:80:4e" "192.168.1.133"
 bind_static_host "Nintendo-Switch" "ec:c4:0d:76:c7:98" "192.168.1.240"
+bind_static_host "OPPO-Reno11-Pro-5G" "b2:f0:78:4f:bd:8c" "192.168.1.158"
 
 # Setup Gaming (EF) & 4K Streaming (AF41) DSCP Rules in nftables
 nft add table inet game_dscp_table 2>/dev/null || true
