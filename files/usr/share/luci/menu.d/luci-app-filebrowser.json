@@ -1,0 +1,12 @@
+{
+	"admin/services/filebrowser": {
+		"title": "FileBrowser",
+		"action": {
+			"type": "view",
+			"path": "filebrowser"
+		},
+		"depends": {
+			"acl": [ "luci-app-filebrowser" ]
+		}
+	}
+}

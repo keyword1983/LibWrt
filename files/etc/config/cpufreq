@@ -1,0 +1,4 @@
+config cpufreq 'cpufreq'
+	option governor 'schedutil'
+	option minfreq '864000'
+	option maxfreq '1200000'
