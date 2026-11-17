@@ -30,11 +30,20 @@ if [ -f /etc/config/firewall ]; then
     uci commit firewall
 fi
 
-# 3. CPU Frequency Tuning (schedutil governor: 864MHz to 1512MHz)
+# 3. CPU Frequency Tuning (schedutil governor)
 if [ -f /etc/config/cpufreq ]; then
+    BOARD_NAME=$(cat /tmp/sysinfo/board_name 2>/dev/null || true)
     uci set cpufreq.@cpufreq[0].governor0='schedutil'
     uci set cpufreq.@cpufreq[0].minfreq0='864000'
-    uci set cpufreq.@cpufreq[0].maxfreq0='1512000'
+    if [ "$BOARD_NAME" = "jdcloud,re-cs-02" ]; then
+        # Athena (JDC AX6600): 864MHz to 1.800GHz
+        uci set cpufreq.@cpufreq[0].maxfreq0='1800000'
+    elif [ "$BOARD_NAME" = "jdcloud,re-ss-01" ]; then
+        # Arthur (JDC AX1800 Pro): 864MHz to 1.200GHz
+        uci set cpufreq.@cpufreq[0].maxfreq0='1200000'
+    else
+        uci set cpufreq.@cpufreq[0].maxfreq0='1200000'
+    fi
     uci commit cpufreq
     /etc/init.d/cpufreq enable 2>/dev/null
 fi
@@ -90,7 +99,7 @@ if [ -f /etc/config/dropbear ]; then
     uci commit dropbear
 fi
 
-# 7. AdGuard Home Filter List Pre-baking (AWAvenue + DaSheng + AdGuard Mobile + anti-AD + AdGuard DNS + User Rules)
+# 8. AdGuard Home Filter List Pre-baking (AWAvenue + DaSheng + AdGuard Mobile + anti-AD + AdGuard DNS + User Rules)
 if [ -f /etc/adguardhome/adguardhome.yaml ]; then
     cat << "EOF" > /tmp/update_agh_filters.py
 import re
@@ -191,25 +200,6 @@ EOF
     /etc/init.d/adguardhome restart 2>/dev/null || true
 fi
 
-# Configure CPU frequency scaling governor for Arthur (re-ss-01) and Athena (re-cs-02)
-BOARD_NAME=$(cat /tmp/sysinfo/board_name 2>/dev/null || true)
-
-# Arthur (JDC AX1800 Pro): 864MHz to 1.200GHz
-if [ "$BOARD_NAME" = "jdcloud,re-ss-01" ]; then
-    uci set cpufreq.cpufreq.governor0='schedutil' 2>/dev/null || true
-    uci set cpufreq.cpufreq.minfreq0='864000' 2>/dev/null || true
-    uci set cpufreq.cpufreq.maxfreq0='1200000' 2>/dev/null || true
-    uci commit cpufreq 2>/dev/null || true
-fi
-
-# Athena (JDC AX6600): 864MHz to 1.800GHz
-if [ "$BOARD_NAME" = "jdcloud,re-cs-02" ]; then
-    uci set cpufreq.cpufreq.governor0='schedutil' 2>/dev/null || true
-    uci set cpufreq.cpufreq.minfreq0='864000' 2>/dev/null || true
-    uci set cpufreq.cpufreq.maxfreq0='1800000' 2>/dev/null || true
-    uci commit cpufreq 2>/dev/null || true
-fi
-
 # Configure MiniDLNA media directories
 uci del minidlna.config.media_dir 2>/dev/null || true
 uci add_list minidlna.config.media_dir='V,/mnt/sda2/A' 2>/dev/null || true
@@ -261,27 +251,12 @@ bind_static_host "Lenovo-Pad" "a8:96:09:fc:80:4e" "192.168.1.133"
 bind_static_host "Nintendo-Switch" "ec:c4:0d:76:c7:98" "192.168.1.240"
 bind_static_host "OPPO-Reno11-Pro-5G" "b2:f0:78:4f:bd:8c" "192.168.1.158"
 
-# Setup Gaming (EF) & 4K Streaming (AF41) DSCP Rules in nftables
-nft add table inet game_dscp_table 2>/dev/null || true
-nft add chain inet game_dscp_table forward_dscp '{ type filter hook forward priority -150; }' 2>/dev/null || true
-nft add set inet game_dscp_table streaming_af41_set '{ type ipv4_addr; flags timeout; timeout 1d; }' 2>/dev/null || true
-nft flush chain inet game_dscp_table forward_dscp 2>/dev/null || true
-
-nft add rule inet game_dscp_table forward_dscp udp dport '{ 3074, 3478-3481, 5000-6000, 8000-9000, 8572, 8801-8802, 9296-9308, 10000-20000, 45000-65535 }' ip dscp set ef 2>/dev/null || true
-nft add rule inet game_dscp_table forward_dscp tcp dport 8200 ip dscp set af41 2>/dev/null || true
-nft add rule inet game_dscp_table forward_dscp ip daddr @streaming_af41_set ip dscp set af41 2>/dev/null || true
-
-# Bind Dnsmasq nftset for Netflix / YouTube / Disney+ CDN Domain Auto-Recognition
-uci del_list dhcp.@dnsmasq[0].nftset='/netflix.com/nflxvideo.net/nflxso.net/googlevideo.com/youtube.com/disneyplus.com/bamgrid.com/4#inet#game_dscp_table#streaming_af41_set' 2>/dev/null || true
-uci add_list dhcp.@dnsmasq[0].nftset='/netflix.com/nflxvideo.net/nflxso.net/googlevideo.com/youtube.com/disneyplus.com/bamgrid.com/4#inet#game_dscp_table#streaming_af41_set' 2>/dev/null || true
+# Enable and start game_dscp QoS service
+/etc/init.d/game_dscp enable 2>/dev/null || true
+/etc/init.d/game_dscp restart 2>/dev/null || true
 
 # Apply all network commits
 uci commit dhcp 2>/dev/null || true
 uci commit network
 
 exit 0
-
-
-
-
-

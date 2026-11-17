@@ -10,4 +10,9 @@ for p in /sys/class/net/br-lan/brif/*; do
     [ -f "$p/multicast_router" ] && echo 2 > "$p/multicast_router" 2>/dev/null
 done
 
+# Ensure game_dscp_table exists in nftables
+if ! nft list table inet game_dscp_table >/dev/null 2>&1; then
+    /etc/init.d/game_dscp start 2>/dev/null || true
+fi
+
 exit 0
