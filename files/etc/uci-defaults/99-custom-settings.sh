@@ -10,6 +10,15 @@ fi
 if uci get network.mm_wan >/dev/null 2>&1; then
     uci set network.mm_wan.metric='3'
 fi
+
+# Ensure 224.0.0.0/4 multicast route always points to br-lan (DLNA SSDP & mDNS discovery)
+if ! uci show network | grep -q "target='224.0.0.0'"; then
+    uci add network route
+    uci set network.@route[-1].interface='lan'
+    uci set network.@route[-1].target='224.0.0.0'
+    uci set network.@route[-1].netmask='240.0.0.0'
+fi
+
 uci commit network
 
 # 2. Add usb_wan and mm_wan to Firewall WAN zone

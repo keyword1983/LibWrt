@@ -5,4 +5,9 @@ echo schedutil > /sys/devices/system/cpu/cpufreq/policy0/scaling_governor 2>/dev
 echo 2048 > /sys/block/mmcblk0/queue/read_ahead_kb 2>/dev/null
 echo 2048 > /sys/block/sda/queue/read_ahead_kb 2>/dev/null
 
+# Set permanent multicast router port (2) on LAN switch ports to ensure uninhibited DLNA SSDP forwarding
+for p in /sys/class/net/br-lan/brif/*; do
+    [ -f "$p/multicast_router" ] && echo 2 > "$p/multicast_router" 2>/dev/null
+done
+
 exit 0
