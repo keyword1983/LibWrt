@@ -42,7 +42,7 @@ fi
 # 5. Network Performance & Enterprise TCP Tuning
 if ! grep -q "net.ipv4.tcp_congestion_control=bbr" /etc/sysctl.conf 2>/dev/null; then
 cat << "EOF" >> /etc/sysctl.conf
-vm.swappiness=60
+vm.swappiness=100
 net.core.default_qdisc=fq
 net.ipv4.tcp_congestion_control=bbr
 net.ipv4.tcp_fastopen=3
