@@ -50,7 +50,7 @@ fi
 
 
 
-# 4. zRAM Memory Compression Tuning (256MB, lzo-rle, swappiness=60)
+# 4. zRAM Memory Compression Tuning (256MB, lzo-rle, swappiness=100)
 if [ -f /etc/config/zram ]; then
     uci set zram.@zram[0].size='256'
     uci set zram.@zram[0].comp_alg='lzo-rle'
@@ -61,7 +61,6 @@ fi
 if ! grep -q "net.ipv4.tcp_congestion_control=bbr" /etc/sysctl.conf 2>/dev/null; then
 cat << "EOF" >> /etc/sysctl.conf
 vm.swappiness=100
-net.core.default_qdisc=fq
 net.ipv4.tcp_congestion_control=bbr
 net.ipv4.tcp_fastopen=3
 net.ipv4.tcp_keepalive_time=30
